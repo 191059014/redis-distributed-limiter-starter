@@ -23,7 +23,7 @@ public class RedisLimiterUtils {
                 .append("key=").append(key).append("; ")
                 .append("period=").append(period).append("; ")
                 .append("maxTimes=").append(maxTimes).append("; ")
-                .append("currentTimes=").append(currentTimes).append(";")
+                .append("currentTimes=").append(currentTimes)
                 .append("]")
                 .toString();
     }

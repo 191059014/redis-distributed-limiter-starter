@@ -77,7 +77,7 @@ public class RedisLimiter {
         RedisScript<Number> redisScript = new DefaultRedisScript<>(LUA_SCRIPT, Number.class);
         Number number = redisTemplate.execute(redisScript, keys, String.valueOf(parameter.getMaxTimes()), String.valueOf(parameter.getPeriod()));
         Integer currentTimes = number == null ? 0 : number.intValue();
-        LOGGER.info("redis doLimit" + RedisLimiterUtils.buildLimitErrorMessage(parameter.getKey(), parameter.getPeriod(), parameter.getMaxTimes(), currentTimes));
+        LOGGER.debug("redis doLimit" + RedisLimiterUtils.buildLimitErrorMessage(parameter.getKey(), parameter.getPeriod(), parameter.getMaxTimes(), currentTimes));
         return currentTimes;
     }
 
