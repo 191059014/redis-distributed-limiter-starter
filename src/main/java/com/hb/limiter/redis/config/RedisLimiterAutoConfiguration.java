@@ -22,7 +22,6 @@ public class RedisLimiterAutoConfiguration {
     @ConditionalOnMissingBean
     @Order(value = 1)
     public RedisLimiter redisLimiter(StringRedisTemplate stringRedisTemplate) {
-        System.out.println("init RedisLimiter: " + stringRedisTemplate);
         return new RedisLimiter(stringRedisTemplate);
     }
 

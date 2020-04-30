@@ -17,7 +17,7 @@ import java.lang.annotation.Target;
 @Documented
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface DistributedLimiter {
+public @interface RedisEasyLimiter {
 
     /**
      * key

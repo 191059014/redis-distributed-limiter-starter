@@ -1,6 +1,9 @@
 package com.hb.limiter.redis;
 
 import com.hb.limiter.redis.model.RedisLimitParameter;
+import com.hb.limiter.redis.util.RedisLimiterUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
@@ -15,6 +18,11 @@ import java.util.List;
  * @since 2020/4/29 14:24
  */
 public class RedisLimiter {
+
+    /**
+     * the constant log
+     */
+    private static final Logger LOGGER = LoggerFactory.getLogger(RedisLimiter.class);
 
     /**
      * redis操作工具
@@ -37,11 +45,10 @@ public class RedisLimiter {
             " local key = KEYS[1] " +
                     " local maxTimes = tonumber(ARGV[1]) " +
                     " local expireTime = tonumber(ARGV[2]) " +
-                    " local currentTimes = tonumber(redis.call('get', key) or '0')" +
-                    " if currentTimes +1 > maxTimes " +
-                    " then return current; " +
+                    " local currentTimes = tonumber(redis.call('incr',key))" +
+                    " if currentTimes > maxTimes " +
+                    " then return currentTimes; " +
                     " end " +
-                    " currentTimes = tonumber(redis.call('incr',key))" +
                     " if currentTimes == 1 then " +
                     " redis.call('expire',key,expireTime) " +
                     " end " +
@@ -60,15 +67,18 @@ public class RedisLimiter {
     }
 
     /**
-     * 限流
+     * lua脚本限流
      *
      * @param parameter 参数
      * @return 当前流量
      */
     public int doLimit(RedisLimitParameter parameter) {
         List<String> keys = Collections.singletonList(parameter.getKey());
-        RedisScript<Integer> redisScript = new DefaultRedisScript<>(LUA_SCRIPT, Integer.class);
-        return redisTemplate.execute(redisScript, keys, parameter.getMaxTimes() + "", parameter.getPeriod() + "");
+        RedisScript<Number> redisScript = new DefaultRedisScript<>(LUA_SCRIPT, Number.class);
+        Number number = redisTemplate.execute(redisScript, keys, String.valueOf(parameter.getMaxTimes()), String.valueOf(parameter.getPeriod()));
+        Integer currentTimes = number == null ? 0 : number.intValue();
+        LOGGER.info("redis doLimit" + RedisLimiterUtils.buildLimitErrorMessage(parameter.getKey(), parameter.getPeriod(), parameter.getMaxTimes(), currentTimes));
+        return currentTimes;
     }
 
 }
