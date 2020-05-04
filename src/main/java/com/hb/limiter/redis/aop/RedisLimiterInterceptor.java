@@ -12,7 +12,6 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Configuration;
 
 import java.lang.reflect.Method;
 
@@ -23,7 +22,6 @@ import java.lang.reflect.Method;
  * @since 2020/4/29 14:43
  */
 @Aspect
-@Configuration
 public class RedisLimiterInterceptor {
 
     /**
@@ -64,7 +62,7 @@ public class RedisLimiterInterceptor {
         if (currentTimes <= maxTimes) {
             return pjp.proceed();
         } else {
-            String desc = "redis limiter effect" + RedisLimiterUtils.buildLimitErrorMessage(key, period, maxTimes, currentTimes);
+            String desc = "redis limit not pass" + RedisLimiterUtils.buildLimitErrorMessage(key, period, maxTimes, currentTimes);
             LOGGER.info(desc);
             throw new RedisLimitException(RedisLimiterConstant.REDIS_LIMIT_NOTPASS_KEY, desc);
         }
